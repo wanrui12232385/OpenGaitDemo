@@ -1,0 +1,4 @@
+Looking in indexes: https://pypi.mirrors.ustc.edu.cn/simple/
+Collecting PaddlePaddle
+  Downloading https://mirrors.bfsu.edu.cn/pypi/web/packages/35/ae/bb0e011f11c026856c643ac3fe023346cc42b702fa201b2044eb8f906dfa/paddlepaddle-2.3.2-cp37-cp37m-manylinux1_x86_64.whl (112.5 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 112.5/112.5 MB 5.9 MB/s eta 0:00:00
