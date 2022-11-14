@@ -13,14 +13,20 @@ from yolox.utils import fuse_model, get_model_info, postprocess
 from yolox.utils.visualize import plot_tracking
 from yolox.tracker.byte_tracker import BYTETracker
 from yolox.tracking_utils.timer import Timer
+from pathlib import Path
 import sys
 # print (os.path.abspath(__file__))                                                          
 # # 打印文件的目录路径（文件的上一层目录），这个时候是在 bin 这一层。
 # print (os.path.dirname( os.path.abspath(__file__) ))                                       
 # # 打印文件的目录路径（文件的上两层目录）, 这个时候是在 atm 这一层。就是os.path.dirname这个再用了一次
-print (os.path.dirname(os.path.dirname(os.path.dirname( os.path.abspath(__file__) ))) + "/PaddleSeg/contrib/PP-HumanSeg/src"  )   
+root = os.path.dirname(os.path.dirname(os.path.dirname( os.path.abspath(__file__) )))
+sys.path.append(root)
+from pretreatment import pretreat
+
+print (os.path.dirname(os.path.dirname(os.path.dirname( os.path.abspath(__file__) ))) + "/PaddleSeg/contrib/PP-HumanSeg/src")   
 config = os.path.dirname(os.path.dirname(os.path.dirname( os.path.abspath(__file__) ))) + "/PaddleSeg/contrib/PP-HumanSeg/" 
 print(config)
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname( os.path.abspath(__file__) ))) + "/PaddleSeg/contrib/PP-HumanSeg/src")
 from seg_demo import seg_opengait_image
 # import sys
@@ -165,6 +171,13 @@ class Predictor(object):
         return outputs, img_info
 
 
+def run_cmd( cmd_str='', echo_print=1):
+    from subprocess import run
+    if echo_print == 1:
+        print('\nrun cmd command = "{}"'.format(cmd_str))
+    run(cmd_str, shell=True)
+
+
 def imageflow_demo(predictor, vis_folder, current_time, args):
     cap = cv2.VideoCapture(args.path if args.demo == "video" else args.camid)
     width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)  # float
@@ -181,6 +194,8 @@ def imageflow_demo(predictor, vis_folder, current_time, args):
     tracker = BYTETracker(args, frame_rate=30)
     timer = Timer()
     frame_id = 0
+
+    count = 0
 
     while True:
         if frame_id == 1:
@@ -224,14 +239,15 @@ def imageflow_demo(predictor, vis_folder, current_time, args):
                         new_w = x2_new - x1_new
                         new_h = y2_new - y1_new
                         tmp = frame[y1_new: y2_new, x1_new: x2_new, :]
-                        cv2.imwrite("/home/jdy/Gaitdateset/Image/out_afterByteTrack/outTmp-{}.jpg".format(frame_id),tmp)
-                        print(111111)
-                        print(config)
+                        cv2.imwrite("/home/jdy/Gaitdateset/Image/out_afterByteTrack/outImg-{}.png".format(count),tmp)
+                        # print(111111)
+                        # print(config)
                         final_config = config + "inference_models/human_pp_humansegv1_lite_192x192_inference_model_with_softmax/deploy.yaml"
                         # config = sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname( os.path.abspath(__file__) ))) + "/PaddleSeg/contrib/inference_models/human_pp_humansegv1_server_512x512_inference_model_with_softmax/deploy.yaml")
                         print(final_config)
-                        save_dir = "/home/jdy/Gaitdateset/Image/out_afterPaddleSeg/outTmp-0.jpg"
+                        save_dir = "/home/jdy/Gaitdateset/Image/out_afterPaddleSeg/outMask-{}.png".format(count)
                         seg_opengait_image(tmp, final_config, save_dir)
+                        count+=1
 
 
                         #tmp为裁剪后的人像
@@ -249,6 +265,15 @@ def imageflow_demo(predictor, vis_folder, current_time, args):
                 break
         else:
             break
+        # 应该是一个id生成一个大的目录，然后就在这里加个预处理的方法
+        pretreat_inputpath = root + "/Image/out_afterPaddleSeg"
+        pretreat_outputpath = root + "/Image/tmp-pkl"
+        print(pretreat_inputpath)
+        print(pretreat_outputpath)
+        # 奇奇怪怪的报错，输入的路径不是str是Path
+        pretreat(input_path=Path(pretreat_inputpath), output_path=Path(pretreat_outputpath))
+
+        # run_cmd("python pretreatment.py --input_path {} --output_path {}".format(pretreat_inputpath, pretreat_outputpath))
         frame_id += 1
 
 
