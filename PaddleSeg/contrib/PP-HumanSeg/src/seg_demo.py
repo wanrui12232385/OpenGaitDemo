@@ -25,6 +25,7 @@ sys.path.append(os.path.abspath(os.path.join(__dir__, '../../../')))
 from paddleseg.utils import get_sys_env, logger, get_image_list
 
 from infer import Predictor
+from infer import Predictor_opengait
 
 
 def parse_args():
@@ -100,6 +101,21 @@ def seg_image(args):
     out_img, out_mask = predictor.run(img, bg_img)
     # cv2.imwrite(args.save_dir, out_img)
     cv2.imwrite(args.save_dir, out_mask)
+
+def seg_opengait_image(img, config, save_dir):
+    # assert os.path.exists(args.img_path), \
+    #     "The --img_path is not existed: {}.".format(args.img_path)
+
+    logger.info("Input: image")
+    logger.info("Create predictor...")
+    predictor = Predictor_opengait(config)
+
+    logger.info("Start predicting...")
+    # img = cv2.imread(args.img_path)
+    bg_img = 255 * np.ones(img.shape)
+    out_img, out_mask = predictor.run(img, bg_img)
+    # cv2.imwrite(args.save_dir, out_img)
+    cv2.imwrite(save_dir, out_mask)
 
 
 def seg_video(args):
