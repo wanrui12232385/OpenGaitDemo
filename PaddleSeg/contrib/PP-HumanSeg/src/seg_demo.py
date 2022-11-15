@@ -102,7 +102,7 @@ def seg_image(args):
     # cv2.imwrite(args.save_dir, out_img)
     cv2.imwrite(args.save_dir, out_mask)
 
-def seg_opengait_image(img, config, save_dir):
+def seg_opengait_image(img, config, save_name, save_path):
     # assert os.path.exists(args.img_path), \
     #     "The --img_path is not existed: {}.".format(args.img_path)
 
@@ -114,8 +114,11 @@ def seg_opengait_image(img, config, save_dir):
     # img = cv2.imread(args.img_path)
     bg_img = 255 * np.ones(img.shape)
     out_img, out_mask = predictor.run(img, bg_img)
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
     # cv2.imwrite(args.save_dir, out_img)
-    cv2.imwrite(save_dir, out_mask)
+    save_name = os.path.join(save_path,save_name)
+    cv2.imwrite(save_name, out_mask)
 
 
 def seg_video(args):
