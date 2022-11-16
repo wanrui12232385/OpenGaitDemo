@@ -20,9 +20,10 @@ import cv2
 import numpy as np
 from tqdm import tqdm
 
-__dir__ = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.abspath(os.path.join(__dir__, '../../../')))
-from paddleseg.utils import get_sys_env, logger, get_image_list
+# __dir__ = os.path.dirname(os.path.abspath(__file__))
+# sys.path.append(os.path.abspath(os.path.join(__dir__, '../../../')))
+# from paddleseg.utils import get_sys_env, logger, get_image_list
+# from paddleseg.utils import get_sys_env, logger, get_image_list
 
 from infer import Predictor
 from infer import Predictor_opengait
@@ -91,11 +92,11 @@ def seg_image(args):
     assert os.path.exists(args.img_path), \
         "The --img_path is not existed: {}.".format(args.img_path)
 
-    logger.info("Input: image")
-    logger.info("Create predictor...")
+    # logger.info("Input: image")
+    # logger.info("Create predictor...")
     predictor = Predictor(args)
 
-    logger.info("Start predicting...")
+    # logger.info("Start predicting...")
     img = cv2.imread(args.img_path)
     bg_img = get_bg_img(args.bg_img_path, img.shape)
     out_img, out_mask = predictor.run(img, bg_img)
@@ -106,11 +107,11 @@ def seg_opengait_image(img, config, save_name, save_path):
     # assert os.path.exists(args.img_path), \
     #     "The --img_path is not existed: {}.".format(args.img_path)
 
-    logger.info("Input: image")
-    logger.info("Create predictor...")
+    # logger.info("Input: image")
+    # logger.info("Create predictor...")
     predictor = Predictor_opengait(config)
 
-    logger.info("Start predicting...")
+    # logger.info("Start predicting...")
     # img = cv2.imread(args.img_path)
     bg_img = 255 * np.ones(img.shape)
     out_img, out_mask = predictor.run(img, bg_img)
@@ -149,11 +150,11 @@ def seg_video(args):
         is_video_bg = False
         bg = get_bg_img(args.bg_img_path, [height, width, 3])
 
-    logger.info("Input: video")
-    logger.info("Create predictor...")
+    # logger.info("Input: video")
+    # logger.info("Create predictor...")
     predictor = Predictor(args)
 
-    logger.info("Start predicting...")
+    # logger.info("Start predicting...")
     with tqdm(total=total_frames) as pbar:
         img_frame_idx = 0
         while cap_img.isOpened():
@@ -198,11 +199,11 @@ def seg_camera(args):
         is_video_bg = False
         bg = get_bg_img(args.bg_img_path, [height, width, 3])
 
-    logger.info("Input: camera")
-    logger.info("Create predictor...")
+    # logger.info("Input: camera")
+    # logger.info("Create predictor...")
     predictor = Predictor(args)
 
-    logger.info("Start predicting...")
+    # logger.info("Start predicting...")
     while cap_camera.isOpened():
         ret_img, img = cap_camera.read()
         if not ret_img:
@@ -230,9 +231,9 @@ def seg_camera(args):
 
 if __name__ == "__main__":
     args = parse_args()
-    env_info = get_sys_env()
-    args.use_gpu = True if env_info['Paddle compiled with cuda'] \
-        and env_info['GPUs used'] else False
+    # env_info = get_sys_env()
+    # args.use_gpu = True if env_info['Paddle compiled with cuda'] \
+    #     and env_info['GPUs used'] else False
 
     makedirs(args.save_dir)
 

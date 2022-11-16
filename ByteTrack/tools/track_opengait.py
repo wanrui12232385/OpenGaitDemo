@@ -6,6 +6,7 @@ import cv2
 import torch
 import glob
 
+
 from loguru import logger
 
 from yolox.data.data_augment import preproc
@@ -17,19 +18,16 @@ from yolox.tracking_utils.timer import Timer
 from pathlib import Path
 import sys
 
-root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+root = os.path.dirname(os.path.dirname(os.path.dirname( os.path.abspath(__file__) )))
 sys.path.append(root)
 from pretreatment import pretreat
+# print (os.path.dirname(os.path.dirname(os.path.dirname( os.path.abspath(__file__) ))) + "/PaddleSeg/contrib/PP-HumanSeg/src")   
+config = os.path.dirname(os.path.dirname(os.path.dirname( os.path.abspath(__file__) ))) + "/PaddleSeg/contrib/PP-HumanSeg/" 
+# print(config)
 
-print(
-    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) + "/PaddleSeg/contrib/PP-HumanSeg/src")
-config = os.path.dirname(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) + "/PaddleSeg/contrib/PP-HumanSeg/"
-print(config)
-
-sys.path.append(
-    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) + "/PaddleSeg/contrib/PP-HumanSeg/src")
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname( os.path.abspath(__file__) ))) + "/PaddleSeg/contrib/PP-HumanSeg/src")
 from seg_demo import seg_opengait_image
+
 
 IMAGE_EXT = [".jpg", ".jpeg", ".webp", ".bmp", ".png"]
 
@@ -43,13 +41,13 @@ def make_parser():
     parser.add_argument("-n", "--name", type=str, default=None, help="model name")
 
     parser.add_argument(
-        # "--path", default="./datasets/mot/train/MOT17-05-FRCNN/img1", help="path to images or video"
+        #"--path", default="./datasets/mot/train/MOT17-05-FRCNN/img1", help="path to images or video"
         "--path", default="/home/jdy/Gaitdateset/Image/videos/001", help="path to images or video"
     )
 
     ##new
     parser.add_argument(
-        # "--path", default="./datasets/mot/train/MOT17-05-FRCNN/img1", help="path to images or video"
+        #"--path", default="./datasets/mot/train/MOT17-05-FRCNN/img1", help="path to images or video"
         "--save_path", default="/home/jdy/Gaitdateset/Image01/videos/001", help="path to save"
     )
 
@@ -115,13 +113,13 @@ def make_parser():
 
 class Predictor(object):
     def __init__(
-            self,
-            model,
-            exp,
-            trt_file=None,
-            decoder=None,
-            device=torch.device("cpu"),
-            fp16=False
+        self,
+        model,
+        exp,
+        trt_file=None,
+        decoder=None,
+        device=torch.device("cpu"),
+        fp16=False
     ):
         self.model = model
         self.decoder = decoder
@@ -170,23 +168,21 @@ class Predictor(object):
             outputs = postprocess(
                 outputs, self.num_classes, self.confthre, self.nmsthre
             )
-            # logger.info("Infer time: {:.4f}s".format(time.time() - t0))
+            #logger.info("Infer time: {:.4f}s".format(time.time() - t0))
         return outputs, img_info
 
-
-def run_cmd(cmd_str='', echo_print=1):
-    from subprocess import run
-    if echo_print == 1:
-        print('\nrun cmd command = "{}"'.format(cmd_str))
-    run(cmd_str, shell=True)
+# def run_cmd( cmd_str='', echo_print=1):
+#     from subprocess import run
+#     if echo_print == 1:
+#         print('\nrun cmd command = "{}"'.format(cmd_str))
+#     run(cmd_str, shell=True)
 
 
 def imageflow_demo(predictor, vis_folder, current_time, args, id, type, seq):
     video_path = osp.join(args.path, id, type, seq)
-
-    save_path = osp.join(args.save_path, id, type, seq)
+    
+    save_path = osp.join(args.save_path, id, type)
     for video in glob.glob(video_path):
-        print(video)
         cap = cv2.VideoCapture(video)
         width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)  # float
         height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)  # float
@@ -225,12 +221,12 @@ def imageflow_demo(predictor, vis_folder, current_time, args, id, type, seq):
                             online_tlwhs.append(tlwh)
                             online_ids.append(tid)
                             online_scores.append(t.score)
-                            # result = []
+                            #result = []
                             # result.append(
                             #     f"{frame_id},{tid},{tlwh[0]:.2f},{tlwh[1]:.2f},{tlwh[2]:.2f},{tlwh[3]:.2f},{t.score:.2f},-1,-1,-1\n"
                             # )
 
-                            # 裁剪
+                            #裁剪
 
                             x = tlwh[0]
                             y = tlwh[1]
@@ -247,21 +243,20 @@ def imageflow_demo(predictor, vis_folder, current_time, args, id, type, seq):
                             new_h = y2_new - y1_new
                             tmp = frame[y1_new: y2_new, x1_new: x2_new, :]
                             # seg_opengait_image(tmp, final_config, save_path)
-
+                            
                             final_config = config + "inference_models/human_pp_humansegv1_lite_192x192_inference_model_with_softmax/deploy.yaml"
                             # config = sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname( os.path.abspath(__file__) ))) + "/PaddleSeg/contrib/inference_models/human_pp_humansegv1_server_512x512_inference_model_with_softmax/deploy.yaml")
                             # print(final_config)
-                            save_name = "outMask-{}.png".format(frame_id)
+                            save_name = "{}-{:03d}.png".format(seq.split('.')[0],frame_id)
 
                             # print("##############################")
                             # print(save_dir)
                             # print("##############################")
-                            seg_opengait_image(tmp, final_config, save_name, save_path)
-                            # tmp为裁剪后的人像
+                            seg_opengait_image(tmp, final_config, save_name,save_path)
+                            #tmp为裁剪后的人像
                     timer.toc()
                     online_im = plot_tracking(
-                        img_info['raw_img'], online_tlwhs, online_ids, frame_id=frame_id + 1,
-                        fps=1. / timer.average_time
+                        img_info['raw_img'], online_tlwhs, online_ids, frame_id=frame_id + 1, fps=1. / timer.average_time
                     )
                 else:
                     timer.toc()
@@ -272,6 +267,8 @@ def imageflow_demo(predictor, vis_folder, current_time, args, id, type, seq):
             else:
                 break
             frame_id += 1
+
+
 
 
 def main(exp, args):
@@ -335,14 +332,13 @@ def main(exp, args):
 
     predictor = Predictor(model, exp, trt_file, decoder, args.device, args.fp16)
     current_time = time.localtime()
-
+    
     data_dir = args.path
     save_dir = args.save_path
     for id in sorted(os.listdir(data_dir)):
-        for type in sorted(os.listdir(os.path.join(data_dir, id))):
-            for seq in sorted(os.listdir(os.path.join(data_dir, id, type))):
+        for type in sorted(os.listdir(os.path.join(data_dir,id))):
+            for seq in sorted(os.listdir(os.path.join(data_dir,id,type))):
                 imageflow_demo(predictor, vis_folder, current_time, args, id, type, seq)
-
 
 if __name__ == "__main__":
     args = make_parser().parse_args()
