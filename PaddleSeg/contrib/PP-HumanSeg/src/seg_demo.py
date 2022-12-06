@@ -122,8 +122,9 @@ def seg_opengait_image(img, config, save_name, save_path):
     save_name0 = os.path.join(save_path,save_name0)
     save_name1 = "{}-{}".format(1, save_name)
     save_name1 = os.path.join(save_path,save_name1)
-    cv2.imwrite(save_name0, out_mask)
-    cv2.imwrite(save_name1, out_img)
+    cv2.imwrite(save_name, out_mask)
+    # cv2.imwrite(save_name0, out_mask)
+    # cv2.imwrite(save_name1, out_img)
 
 
 def seg_video(args):

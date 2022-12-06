@@ -1,0 +1,5 @@
+[2022-11-14 19:09:42,405 - INFO]: Listing /home/jdy/Gaitdateset/Image/out_afterPaddleSeg
+[2022-11-14 19:09:42,406 - INFO]: Total files listed: 17
+[2022-11-14 19:09:42,415 - INFO]: Start pretreating /home/jdy/Gaitdateset/Image/out_afterPaddleSeg
+[2022-11-14 19:09:42,433 - INFO]: Saved 17 valid frames to /home/jdy/Gaitdateset/Image/tmp-pkl/Gaitdateset/Image/out_afterPaddleSeg/out_afterPaddleSeg.pkl.
+[2022-11-14 19:09:42,519 - INFO]: Done
