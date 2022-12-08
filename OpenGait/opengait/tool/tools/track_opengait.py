@@ -10,35 +10,44 @@ import pandas as pd
 from torch import nn
 
 from loguru import logger
+import sys
+sys.path.append("..")
+print(sys.path)
 
 from yolox.data.data_augment import preproc
 from yolox.exp import get_exp
 from yolox.utils import fuse_model, get_model_info, postprocess
-from yolox.utils.visualize import plot_tracking
-from yolox.tracker.byte_tracker import BYTETracker
 from yolox.tracking_utils.timer import Timer
 from pathlib import Path
-import sys
+from yolox.utils.visualize import plot_tracking
+from yolox.tracker.byte_tracker import BYTETracker
+
 
 root = os.path.dirname(os.path.dirname(os.path.dirname( os.path.abspath(__file__) )))
 sys.path.append(root)
+# print("######################")
+# print(os.path.abspath(__file__))
 
 
-# print (os.path.dirname(os.path.dirname(os.path.dirname( os.path.abspath(__file__) ))) + "/PaddleSeg/contrib/PP-HumanSeg/src")   
-config = os.path.dirname(os.path.dirname(os.path.dirname( os.path.abspath(__file__) ))) + "/PaddleSeg/contrib/PP-HumanSeg/" 
-# print(config)
+config = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname( os.path.abspath(__file__) ))))) + "/PaddleSeg/contrib/PP-HumanSeg/"
+print("#######################")
+print(config)
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname( os.path.abspath(__file__) ))) + "/PaddleSeg/contrib/PP-HumanSeg/src")
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname( os.path.abspath(__file__) ))) + "/OpenGait/datasets")
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname( os.path.abspath(__file__) ))))) + "/PaddleSeg/contrib/PP-HumanSeg/src")
 
 from seg_demo import seg_opengait_image
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname( os.path.abspath(__file__) )))) + "/datasets")
+# print(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname( os.path.abspath(__file__) )))) + "/datasets")
 from pretreatment import pretreat
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname( os.path.abspath(__file__) ))) + "/OpenGait/opengait/")
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname( os.path.abspath(__file__) ))) + "/OpenGait/opengait/modeling/models/")
+# sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname( os.path.abspath(__file__) ))) + "/OpenGait/opengait/")
+# sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname( os.path.abspath(__file__) ))) + "/OpenGait/opengait/modeling/models/")
 # from modeling import models
+print("##############################################")
+print(os.path.dirname(os.path.dirname(os.path.dirname( os.path.abspath(__file__)))))
 from utils import config_loader, get_ddp_module, init_seeds, params_count, get_msg_mgr
-# from baseline import Baseline
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname( os.path.abspath(__file__)))) + "/modeling/models/")
+from baseline import Baseline
 
 IMAGE_EXT = [".jpg", ".jpeg", ".webp", ".bmp", ".png"]
 
