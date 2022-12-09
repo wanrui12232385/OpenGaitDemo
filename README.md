@@ -19,6 +19,8 @@ python3 OpenGait/opengait/tool/tools/track_gait.py video -f ByteTrack/exps/examp
 可能会有yolox的问题
 解决方案:
 ```
+cd OpenGait/opengait/tool
+python setup.py develop
 
 ```
 
