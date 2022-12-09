@@ -25,8 +25,6 @@ root = os.path.dirname(os.path.dirname(os.path.dirname( os.path.abspath(__file__
 sys.path.append(root)
 config = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname( os.path.abspath(__file__) ))))) + "/PaddleSeg/contrib/PP-HumanSeg/"
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname( os.path.abspath(__file__) ))))) + "/PaddleSeg/contrib/PP-HumanSeg/src")
-print("#############################")
-print(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname( os.path.abspath(__file__) ))))) + "/PaddleSeg/contrib/PP-HumanSeg/src")
 from seg_demo import seg_opengait_image
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname( os.path.abspath(__file__) )))) + "/datasets")
 from pretreatment import pretreat
@@ -34,7 +32,7 @@ from utils import config_loader, get_ddp_module, init_seeds, params_count, get_m
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname( os.path.abspath(__file__)))) + "/modeling/models/")
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname( os.path.abspath(__file__)))) + "/modeling/")
 from modeling import models
-# from baseline import Baseline
+
 
 IMAGE_EXT = [".jpg", ".jpeg", ".webp", ".bmp", ".png"]
 
@@ -48,39 +46,34 @@ def make_parser():
     parser.add_argument("-n", "--name", type=str, default=None, help="model name")
 
     parser.add_argument(
-        #"--path", default="./datasets/mot/train/MOT17-05-FRCNN/img1", help="path to images or video"
-        "--path", default="/home/jdy/Gaitdateset/Image/videos/001", help="path to images or video"
+        "--path", default="./Image/videos/001", help="path to images or video"
     )
 
     # 有剪影图 png的
     parser.add_argument(
-        #"--path", default="./datasets/mot/train/MOT17-05-FRCNN/img1", help="path to images or video"
-        "--save_path", default="/home/jdy/Gaitdateset/Image01/videos/001", help="path to save"
+        "--save_path", default="./Image01/videos/001", help="path to save"
     )
     # 只有剪影图
     parser.add_argument(
-        #"--path", default="./datasets/mot/train/MOT17-05-FRCNN/img1", help="path to images or video"
-        "--savesil_path", default="/home/jdy/Gaitdateset/Image02/videos/001", help="path to save"
+        "--savesil_path", default="./Image02/videos/001", help="path to save"
     )
 ##############################################
     parser.add_argument(
-        "--gait_model",default="/home/jdy/Gaitdateset/gait_model/Baseline-150000.pt",help="path of gait model"
+        "--gait_model",default="./gait_model/Baseline-150000.pt",help="path of gait model"
     )
     
     # 有剪影图的pkl
     parser.add_argument(
-        #"--path", default="./datasets/mot/train/MOT17-05-FRCNN/img1", help="path to images or video"
-        "--pkl_save_path", default="/home/jdy/Gaitdateset/Image03/videos/", help="path to save pkl"
+        "--pkl_save_path", default="./Image03/videos/", help="path to save pkl"
     )
 
     # 有特征矩阵的pkl
     parser.add_argument(
-        # "--path", default="./datasets/mot/train/MOT17-05-FRCNN/img1", help="path to images or video"
-        "--whole_pkl_save_path", default="/home/jdy/Gaitdateset/Image04/videos/", help="path to save pkl"
+        "--whole_pkl_save_path", default="./Image04/videos/", help="path to save pkl"
     )
     parser.add_argument('-nw', '--n_workers', default=4, type=int, help='Number of thread workers. Default: 4')
     parser.add_argument('--cfgs', type=str,
-                    default='/home/jdy/OpenGait/configs/baseline/baseline_OUMVLP.yaml', help="path of config file")
+                    default='./OpenGait/configs/baseline/baseline.yaml', help="path of config file")
 #############################################
     parser.add_argument("--camid", type=int, default=0, help="webcam demo camera id")
     parser.add_argument(
