@@ -46,16 +46,16 @@ def make_parser():
     parser.add_argument("-n", "--name", type=str, default=None, help="model name")
 
     parser.add_argument(
-        "--path", default="./Image/videos/001", help="path to images or video"
+        "--path", default="./Image/videos/", help="path to images or video"
     )
 
     # 有剪影图 png的
     parser.add_argument(
-        "--save_path", default="./Image01/videos/001", help="path to save"
+        "--save_path", default="./Image01/videos/", help="path to save"
     )
     # 只有剪影图
     parser.add_argument(
-        "--savesil_path", default="./Image02/videos/001", help="path to save"
+        "--savesil_path", default="./Image02/videos/", help="path to save"
     )
 ##############################################
     parser.add_argument(
@@ -223,10 +223,10 @@ class Predictor(object):
         return outputs, img_info
 
 
-def imageflow_demo(predictor, vis_folder, current_time, args, id, type, seq):
-    video_path = osp.join(args.path, id, type, seq)
-    save_path = osp.join(args.save_path, id, type)
-    savesil_path = osp.join(args.savesil_path, id, type)
+def imageflow_demo(predictor, vis_folder, current_time, args, id, type, people, seq):
+    video_path = osp.join(args.path, id, type, people, seq)
+    save_path = osp.join(args.save_path, id, type, people)
+    savesil_path = osp.join(args.savesil_path, id, type, people)
     for video in glob.glob(video_path):
         cap = cv2.VideoCapture(video)
         width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)  # float
@@ -311,12 +311,19 @@ def gait(args):
     print("========= Load Done.... ==========")
 
     loader = gaitmodel.test_loader
+    # dic = []
+    i = 0
     for inputs in loader:
+        print("num: ",i)
         ipts = gaitmodel.inputs_pretreament(inputs)
-        print(ipts)
+        print("ipts: ",ipts)
         retval, embs = gaitmodel.forward(ipts, args.whole_pkl_save_path)
+        # dic.append[embs]
         print(embs)
         del ipts
+        i+=1
+    
+    # return dic
 
 
 def main(exp, args):
@@ -383,13 +390,15 @@ def main(exp, args):
     current_time = time.localtime()
     
     data_dir = args.path
-    save_dir = args.save_path
     for id in sorted(os.listdir(data_dir)):
         for type in sorted(os.listdir(os.path.join(data_dir,id))):
             for seq in sorted(os.listdir(os.path.join(data_dir,id,type))):
-                print("############################111111")
-                imageflow_demo(predictor, vis_folder, current_time, args, id, type, seq)
-    
+                for people in sorted(os.listdir(os.path.join(data_dir,id,type,seq))):
+                    print("############################111111")
+                    print(os.path.join(data_dir,id,type,seq,people))
+                    print(data_dir,id,type,seq,people)
+                    #imageflow_demo(predictor, vis_folder, current_time, args, id, type, seq)
+                    imageflow_demo(predictor, vis_folder, current_time, args, id ,type, seq, people)
 
     print("###################")
     print(Path(args.pkl_save_path))

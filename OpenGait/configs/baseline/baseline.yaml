@@ -1,8 +1,10 @@
 data_cfg:
   dataset_name: CASIA-B
-  dataset_root: your_path
-  dataset_partition: ./datasets/CASIA-B/CASIA-B_include_005.json
-  num_workers: 1
+  # dataset_root: /home/ydq/workspace/OpenGait/data/casiab-64-pkl/
+  # dataset_partition: /home/jdy/Gaitdateset/OpenGait/datasets/CASIA-B/CASIA-B_include_005.json
+  dataset_root: /home/jdy/Gaitdateset/Image03/videos/
+  dataset_partition: /home/jdy/Gaitdateset/OpenGait/datasets/CASIA-B/demo.json
+  num_workers: 0
   remove_no_gallery: false # Remove probe if no gallery for it
   test_dataset_name: CASIA-B
 

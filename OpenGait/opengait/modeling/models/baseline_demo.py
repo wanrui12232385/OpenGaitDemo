@@ -48,8 +48,10 @@ class Baseline(BaseModel):
             }
         }
         save_name = "{}{}.pkl".format(path, self.id)
-        if self.id < 50:
-            pkl = open(save_name, 'wb')
-            pickle.dump(embed, pkl)
-            self.id += 1
+        # if self.id % 20 == 0:
+        pkl = open(save_name, 'wb')
+        pickle.dump(embed, pkl)
+        self.id += 1
+        print("######################################")
+        print(self.id)
         return retval, embed

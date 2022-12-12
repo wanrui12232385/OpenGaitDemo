@@ -217,7 +217,7 @@ class BaseModel(MetaModel, nn.Module):
             sampler=tordata.SequentialSampler(dataset),
             collate_fn=CollateFn(dataset.label_set, sampler_cfg),
             num_workers=data_cfg['num_workers'], 
-            batch_size=4)
+            batch_size=1)
         return loader
 
     # def get_optimizer(self, optimizer_cfg):
