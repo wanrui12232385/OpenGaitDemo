@@ -19,6 +19,7 @@ import sys
 import cv2
 import numpy as np
 from tqdm import tqdm
+from PIL import Image
 
 # __dir__ = os.path.dirname(os.path.abspath(__file__))
 # sys.path.append(os.path.abspath(os.path.join(__dir__, '../../../')))
@@ -27,7 +28,8 @@ from tqdm import tqdm
 
 from infer import Predictor
 from infer import Predictor_opengait
-
+# from infer import Predictor_opengait_new
+# from infer import Predictor_new
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -103,28 +105,96 @@ def seg_image(args):
     # cv2.imwrite(args.save_dir, out_img)
     cv2.imwrite(args.save_dir, out_mask)
 
-def seg_opengait_image(img, config, save_name, save_path):
+def seg_opengait_image(img, config, save_name, savesil_path, save_path):
+    # savesil_path就存剪影图 savepath存剪影图 png
+
     # assert os.path.exists(args.img_path), \
     #     "The --img_path is not existed: {}.".format(args.img_path)
 
-    # logger.info("Input: image")
-    # logger.info("Create predictor...")
     predictor = Predictor_opengait(config)
-
-    # logger.info("Start predicting...")
-    # img = cv2.imread(args.img_path)
     bg_img = 255 * np.ones(img.shape)
     out_img, out_mask = predictor.run(img, bg_img)
+    print(out_mask.shape)
+
+    therehold = 80
+    for i in range(out_mask.shape[0]):
+        for j in range(out_mask.shape[1]):
+            for k in range(out_mask.shape[2]):
+                out_mask[i][j][k]=np.where(out_mask[i][j][k]<therehold,0,255)
+
+    if not os.path.exists(savesil_path):
+        os.makedirs(savesil_path)
     if not os.path.exists(save_path):
         os.makedirs(save_path)
-    # cv2.imwrite(args.save_dir, out_img)
     save_name0 = "{}-{}".format(0, save_name)
     save_name0 = os.path.join(save_path,save_name0)
     save_name1 = "{}-{}".format(1, save_name)
     save_name1 = os.path.join(save_path,save_name1)
-    cv2.imwrite(save_name, out_mask)
-    # cv2.imwrite(save_name0, out_mask)
-    # cv2.imwrite(save_name1, out_img)
+    savesil_name = os.path.join(savesil_path, save_name)
+    cv2.imwrite(savesil_name, out_mask)
+    cv2.imwrite(save_name0, out_mask)
+    cv2.imwrite(save_name1, out_img)
+
+# def seg_opengait_image_new(img, config, save_name, savesil_path, save_path):
+#     predictor = Predictor_opengait_new(config)
+#     bg_img = 255 * np.ones(img.shape)
+#     out_img, out_mask = predictor.run(img, bg_img)
+#
+#     #therehold 是阙值
+#     therehold = 80
+#     for i in range(out_mask.shape[0]):
+#         for j in range(out_mask.shape[1]):
+#             for k in range(3):
+#                 out_mask[i][j][k]=np.where(out_mask[i][j][k]<therehold,0,255)
+#
+#     if not os.path.exists(savesil_path):
+#         os.makedirs(savesil_path)
+#     if not os.path.exists(save_path):
+#         os.makedirs(save_path)
+#     save_name0 = "{}-{}".format(0, save_name)
+#     save_name0 = os.path.join(save_path,save_name0)
+#     save_name1 = "{}-{}".format(1, save_name)
+#     save_name1 = os.path.join(save_path,save_name1)
+#     savesil_name = os.path.join(savesil_path, save_name)
+#     cv2.imwrite(savesil_name, out_mask)
+#     cv2.imwrite(save_name0, out_mask)
+#     cv2.imwrite(save_name1, out_img)
+#
+#     # predictor = Predictor_opengait_new(config)
+#     # bg_img = 255 * np.ones(img.shape)
+#     # out_img, out_mask = predictor.run(img, bg_img)
+#     # print(out_mask.shape)
+#     # # out_mask = Image.fromarray(np.uint8(out_mask))
+#     # # out_mask = out_mask.convert("1")
+#
+#     # # output_data = out_img.as_ndarray()
+#     # output_data = out_img*255
+#     # # output_data = (output_data[0, :, :, 0]*255).astype('uint8')
+#     # output_data = cv2.resize(
+#     #         output_data, (img.shape[1], img.shape[0]), interpolation=cv2.INTER_NEAREST)
+#     # if not os.path.exists(savesil_path):
+#     #     os.makedirs(savesil_path)
+#     # if not os.path.exists(save_path):
+#     #     os.makedirs(save_path)
+#     # save_name0 = "{}-{}".format(0, save_name)
+#     # save_name0 = os.path.join(save_path,save_name0)
+#     # save_name1 = "{}-{}".format(1, save_name)
+#     # save_name1 = os.path.join(save_path,save_name1)
+#     # savesil_name = os.path.join(savesil_path, save_name)
+#     # cv2.imwrite(savesil_name, out_mask)
+#     # cv2.imwrite(save_name0, out_mask)
+#     # cv2.imwrite(save_name1, output_data)
+#
+#     # # if not os.path.exists(savesil_path):
+#     # #     os.makedirs(savesil_path)
+#     # # savesil_name = os.path.join(savesil_path, save_name)
+#
+#     # # predictor = Predictor_opengait_new(config)
+#     # # mask = predictor.predict(img)
+#     # # mask = cv2.resize(
+#     # #         mask, (img.shape[1], img.shape[0]), interpolation=cv2.INTER_NEAREST)
+#     # # cv2.imwrite(savesil_name, mask)
+
 
 
 def seg_video(args):
