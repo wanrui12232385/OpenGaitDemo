@@ -32,10 +32,13 @@ from utils import config_loader, get_ddp_module, init_seeds, params_count, get_m
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname( os.path.abspath(__file__)))) + "/modeling/models/")
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname( os.path.abspath(__file__)))) + "/modeling/")
 from modeling import models
+import gait_compare
 
 
 IMAGE_EXT = [".jpg", ".jpeg", ".webp", ".bmp", ".png"]
 
+# 运行指令：
+# python3 OpenGait/opengait/tool/tools/track_gait.py video -f ByteTrack/exps/example/mot/yolox_x_mix_det.py -c ByteTrack/pretrained/bytetrack_x_mot17.pth.tar --fp16 --fuse --save_result  --phase test --compare True
 
 def make_parser():
     parser = argparse.ArgumentParser("ByteTrack Demo!")
@@ -71,6 +74,12 @@ def make_parser():
     parser.add_argument(
         "--whole_pkl_save_path", default="./Image04/videos/", help="path to save pkl"
     )
+    # 生成embs.pkl的位置
+    parser.add_argument(
+        "--embspath", default="./Embs/", help="path to save or load embs"
+    )
+
+
     parser.add_argument('-nw', '--n_workers', default=4, type=int, help='Number of thread workers. Default: 4')
     parser.add_argument('--cfgs', type=str,
                     default='./OpenGait/configs/baseline/baseline.yaml', help="path of config file")
@@ -137,7 +146,7 @@ def make_parser():
     parser.add_argument("--workers",type=int, default=4, help="workers")
     parser.add_argument("--verbose",type=bool, default=False, help="verbose")
     parser.add_argument("--dataset",default='CASIAB', help="dataset")
-    #gait
+    # gait
     parser.add_argument('--local_rank', type=int, default=0,
                         help="passed by torch.distributed.launch module")
     parser.add_argument('--phase', default='train',
@@ -145,6 +154,9 @@ def make_parser():
     parser.add_argument('--log_to_file', action='store_true',
                         help="log to file, default path is: output/<dataset>/<model>/<save_name>/<logs>/<Datetime>.txt")
     parser.add_argument('--iter', default=0, help="iter to restore")
+
+    # compare
+    parser.add_argument('--compare', type=bool, default=False, help="whether to compare")
 
     return parser
 
@@ -300,9 +312,7 @@ def imageflow_demo(predictor, vis_folder, current_time, args, id, type, people, 
                 break
             frame_id += 1
 
-def gait(args):
-    pkl_save = args.pkl_save_path
-
+def gait(args, embslist:list):
     print("========= Loading model..... ==========")
     # initialization(config_loader(cfgs["gaitmodel"]["cfg_path"]), False)
     gaitmodel, newcfgs = loadModel(**cfgs["gaitmodel"])
@@ -314,12 +324,35 @@ def gait(args):
     # dic = []
     i = 0
     for inputs in loader:
-        print("num: ",i)
+        print("num: ", i)
         ipts = gaitmodel.inputs_pretreament(inputs)
-        print("ipts: ",ipts)
-        retval, embs = gaitmodel.forward(ipts, args.whole_pkl_save_path)
+        print("inputs: ", inputs[1][0], inputs[2], inputs[3])
+        # subject:inputs[1][0] type:inputs[2][0] view:inputs[3][0]
+        print("################")
+        # print("ipts: ",ipts)
+        # print("################")
+        savePklPath = "{}/{:03d}/{}/{}".format(args.whole_pkl_save_path,inputs[1][0],inputs[2][0],inputs[3][0])
+        if not os.path.exists(savePklPath):
+            os.makedirs(savePklPath)
+        savePklName = "{}/{}.pkl".format(savePklPath, inputs[3][0])
+        retval, embs = gaitmodel.forward(ipts, savePklName)
         # dic.append[embs]
-        print(embs)
+        if args.compare:
+           # 进行特征比对
+           print(args.compare)
+        else: 
+            print(args.compare)
+            if len(embslist) == 0:
+                embslist.append(embs)
+            for idx, e in enumerate(embslist):
+                print("idx: ",idx)
+                if e.equal(embs):
+                    print("break##############")
+                    break
+                elif idx == len(embslist)-1:
+                    embslist.append(embs)
+            
+        # print(embs)
         del ipts
         i+=1
     
@@ -406,8 +439,31 @@ def main(exp, args):
     pretreat(input_path=Path(args.save_path), output_path=Path(args.pkl_save_path), img_size=args.img_size, workers=args.n_workers, verbose=args.verbose, dataset=args.dataset)
     pkl_save = args.pkl_save_path
 
+
+
+    # 加载embs, 先固定名字是embeddings吧
+    # load embslist
+    # embslist是记录特征矩阵的list
+    embslist = []
+    embs_path = "{}{}.pkl".format(args.embspath, "embeddings")
+    if not osp.exists(args.embspath):
+        os.makedirs(args.embspath)
+    if osp.exists(embs_path):
+        print("========= Load Embs..... ==========")
+        with open(embs_path,'rb') as f:	
+            embslist = pickle.load(f)	
+            print(embslist)
+            print("========= Finish Load Embs..... ==========")
+
     # gait
-    gait(args)
+    gait(args, embslist)
+    # save embslist
+    pkl = open(embs_path, 'wb')
+    pickle.dump(embslist, pkl)
+    print("========= Final Embs..... ==========")
+    print(embslist)
+    
+
 
 
 
