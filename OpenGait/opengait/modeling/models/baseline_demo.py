@@ -12,9 +12,9 @@ class Baseline(BaseModel):
         self.BNNecks = SeparateBNNecks(**model_cfg['SeparateBNNecks'])
         self.TP = PackSequenceWrapper(torch.max)
         self.HPP = HorizontalPoolingPyramid(bin_num=model_cfg['bin_num'])
-        self.id = 0
+        # self.id = 0
 
-    def forward(self, inputs, path):
+    def forward(self, inputs):
         ipts, labs, _, _, seqL = inputs
 
         sils = ipts[0]
@@ -47,11 +47,9 @@ class Baseline(BaseModel):
                 'embeddings': embed
             }
         }
-        save_name = "{}{}.pkl".format(path, self.id)
+        # save_name = "{}{}.pkl".format(path, self.id)
         # if self.id % 20 == 0:
-        pkl = open(save_name, 'wb')
-        pickle.dump(embed, pkl)
-        self.id += 1
-        print("######################################")
-        print(self.id)
+        # self.id += 1
+        # print("######################################selfid")
+        # print(self.id)
         return retval, embed

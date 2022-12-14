@@ -119,7 +119,7 @@ class BaseModel(MetaModel, nn.Module):
 
     """
 
-    def __init__(self, cfgs, training):
+    def __init__(self, cfgs, training, compare=False):
         """Initialize the base model.
 
         Complete the model initialization, including the data loader, the network, the optimizer, the scheduler, the loss.
@@ -134,6 +134,7 @@ class BaseModel(MetaModel, nn.Module):
         super(BaseModel, self).__init__()
         self.cfgs = cfgs
         self.iteration = 0
+        self.compare = compare
         self.engine_cfg = cfgs['evaluator_cfg']
         if self.engine_cfg is None:
             raise Exception("Initialize a model without -Engine-Cfgs-")
@@ -195,9 +196,9 @@ class BaseModel(MetaModel, nn.Module):
                     nn.init.normal_(m.weight.data, 1.0, 0.02)
                     nn.init.constant_(m.bias.data, 0.0)
 
-    def get_loader(self, data_cfg, train=True):
+    def get_loader(self, data_cfg, train=True,compare=False):
         sampler_cfg = self.cfgs['evaluator_cfg']['sampler']
-        dataset = DataSet(data_cfg, train)
+        dataset = DataSet(data_cfg, train, compare)
 
         # Sampler = get_attr_from([Samplers], sampler_cfg['type']) #写死成下面的那个Sampler
         # Sampler = InferenceSampler(sampler_cfg)
