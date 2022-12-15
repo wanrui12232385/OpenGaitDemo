@@ -1,7 +1,6 @@
 import torch
 from ..base_model_demo import BaseModel
 from ..modules import SetBlockWrapper, HorizontalPoolingPyramid, PackSequenceWrapper, SeparateFCs, SeparateBNNecks
-import pickle
 
 class Baseline(BaseModel):
 
@@ -12,7 +11,6 @@ class Baseline(BaseModel):
         self.BNNecks = SeparateBNNecks(**model_cfg['SeparateBNNecks'])
         self.TP = PackSequenceWrapper(torch.max)
         self.HPP = HorizontalPoolingPyramid(bin_num=model_cfg['bin_num'])
-        # self.id = 0
 
     def forward(self, inputs):
         ipts, labs, _, _, seqL = inputs
@@ -23,7 +21,6 @@ class Baseline(BaseModel):
 
         del ipts
         outs = self.Backbone(sils)  # [n, c, s, h, w]
-        print(1111)
 
         # Temporal Pooling, TP
         outs = self.TP(outs, seqL, options={"dim": 2})[0]  # [n, c, h, w]
@@ -47,9 +44,4 @@ class Baseline(BaseModel):
                 'embeddings': embed
             }
         }
-        # save_name = "{}{}.pkl".format(path, self.id)
-        # if self.id % 20 == 0:
-        # self.id += 1
-        # print("######################################selfid")
-        # print(self.id)
         return retval, embed
