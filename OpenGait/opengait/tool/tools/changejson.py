@@ -14,10 +14,10 @@ def writejson(path, idlist, gallery=True):
     with open(path, 'w') as write_f:
         json.dump(jsondict, write_f, indent=4, ensure_ascii=False)
 
-def getid(path, id):
+def getid(path, id, gallery=True):
     with open(path,'rb')as f:
         jsondict = json.load(f)
-    return jsondict['TEST_SET'][id-1]
+    return jsondict['TEST_SET'][id-1] if gallery else jsondict['COMPARE_SET'][id-1]
 
 def getidlist(path, gallery):
     with open(path,'rb')as f:

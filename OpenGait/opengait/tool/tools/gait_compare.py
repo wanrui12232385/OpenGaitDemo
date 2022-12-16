@@ -18,9 +18,12 @@ def compareid(data,dict,threshold_value):
                 for view in subject[type]:
                     value = subject[type][view]
                     distance = computedistence(embs["embeddings"],value)
-                    if distance < min:
+                    if distance.float() < min:
+                        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
                         id = key
-                        min = distance
+                        min = distance.float()
     if id is None:
         print("############## no id #####################")
+    print("############## distance #####################")
+    print(distance.float(), min)
     return id
