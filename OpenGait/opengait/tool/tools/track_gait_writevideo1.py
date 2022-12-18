@@ -8,7 +8,8 @@ import torch
 import pandas as pd
 from torch import nn
 import torch
-
+import math
+import numpy as np
 from loguru import logger
 import sys
 from yolox.data.data_augment import preproc
@@ -52,8 +53,8 @@ def make_parser():
     )
     # 初始视频gallery作用，具体到.mp4文件,有机会改成--gallerypath
     parser.add_argument(
-        # "--gallerypath", default="./Image/palace.mp4", help="path to images or video"
-        "--gallerypath", default="./Image/demo2.mp4", help="path to images or video"
+        "--gallerypath", default="./Image/demo6.mp4", help="path to images or video"
+        # "--gallerypath", default="./Image/demo2.mp4", help="path to images or video"
     )
     # 有剪影图 png的
     parser.add_argument(
@@ -71,8 +72,8 @@ def make_parser():
 
     # 初始视频probe作用，具体到.mp4文件,有机会改成--probepath
     parser.add_argument(
-        # "--probepath", default="./Image/005-nm-01-090.mp4", help="path to images or video"
-                "--probepath", default="./Image/demo2.mp4", help="path to images or video"
+        "--probepath", default="./Image/demo4.mp4", help="path to images or video"
+                # "--probepath", default="./Image/demo2.mp4", help="path to images or video"
     )
     # 有剪影图 png的
     parser.add_argument(
@@ -278,8 +279,8 @@ def imageflow_demo(predictor, vis_folder, current_time, args, gallery=True):
     mark = False
     mintid = 0
     while True:
-        if frame_id == 10:
-            break
+        # if frame_id == 10:
+        #     break
         print("frame {} begins".format(frame_id))
         if frame_id % 20 == 0:
             logger.info('Processing frame {} ({:.2f} fps)'.format(frame_id, 1. / max(1e-5, timer.average_time)))
@@ -326,21 +327,50 @@ def imageflow_demo(predictor, vis_folder, current_time, args, gallery=True):
                         height = tlwh[3]
 
                         x1, y1, x2, y2 = int(x), int(y), int(x + width), int(y + height)
+                        tmp_ori = frame[y1: y2, x1: x2, :]
+
                         w, h = x2 - x1, y2 - y1
+                        # w, h = width, height
+                        # x1_new = int(x1 - 0.1 * w)
+                        # x2_new = int(x2 + 0.1 * w)
+                        # y1_new = int(y1 - 0.1 * h)
+                        # y2_new = int(y2 + 0.1 * h)
                         x1_new = max(0, int(x1 - 0.1 * w))
                         x2_new = min(int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(x2 + 0.1 * w))
                         y1_new = max(0, int(y1 - 0.1 * h))
-                        y2_new = min(int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(y2 + 0.1 * h))
+                        y2_new = min(int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)), int(y2 + 0.1 * h))
+                        # frame.shape[0]
+
+                        # x1_new = max(0, int(x1 - 0.1 * w))
+                        # x2_new = min(int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(x2 + 0.1 * w))
+                        # y1_new = max(0, int(y1 - 0.1 * h))
+                        # y2_new = min(int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(y2 + 0.1 * h))
+                        
                         new_w = x2_new - x1_new
                         new_h = y2_new - y1_new
                         tmp = frame[y1_new: y2_new, x1_new: x2_new, :]
                         final_config = config + "inference_models/human_pp_humansegv1_lite_192x192_inference_model_with_softmax/deploy.yaml"
-            
+
                         # 先用tid来进行命名
                         save_name = "{:03d}-{:03d}.png".format(tid, frame_id)
                         save_name0 = "{}-{}".format(555, save_name)
                         save_name0 = os.path.join(save_path,save_name0)
                         cv2.imwrite(save_name0, tmp)
+                        save_name1 = "{}-{}".format(666, save_name)
+                        save_name1 = os.path.join(save_path,save_name1)
+                        # cv2.imwrite(save_name1, tmp_ori)
+                        
+                        #居中调整seg
+                        side = max(new_w,new_h)
+                        tmp_new = [[[255,255,255]]*side]*side
+                        tmp_new = np.array(tmp_new)
+                        width01 = math.floor((side-new_w)/2)
+                        height01 = math.floor((side-new_h)/2)
+                        tmp_new[int(height01):int(height01+new_h),int(width01):int(width01+new_w),:] = tmp
+                        tmp_new=tmp_new.astype(np.uint8)
+                        tmp = cv2.resize(tmp_new,(192,192))
+                        #居中调整seg
+                        #seg_opengait_image(tmp, final_config, save_name, savesil_path,save_path)
                         seg_opengait_image(tmp, final_config, save_name, savesil_path,save_path)
                 timer.toc()
             else:
@@ -384,8 +414,8 @@ def writeresult(predictor, vis_folder, current_time, args, pgdict, mintid):
     mark = False
     diff = 0
     while True:
-        if frame_id == 10:
-            break
+        # if frame_id == 10:
+        #     break
         print("frame {} begins".format(frame_id))
         if frame_id % 20 == 0:
             logger.info('Processing frame {} ({:.2f} fps)'.format(frame_id, 1. / max(1e-5, timer.average_time)))
@@ -495,13 +525,17 @@ def gaitcompare(args, embsdict:dict, judge=False):
     loader = gaitmodel.get_loader(
                 cfgloader['data_cfg'], train=False, compare=judge)
     pg_dict = {}
+    matrix_dict = {}
     for inputs in loader:
         probeid = inputs[1][0]+1
         realprobeid = getid(args.jsonpath, probeid, False)
         ipts = gaitmodel.inputs_pretreament(inputs)
         retval, embs = gaitmodel.forward(ipts)
-        id = gc.compareid(retval,embsdict,100)
+        id, iddict = gc.compareid(retval,embsdict,args.jsonpath,100)
+        # matrix_dict[realprobeid] = iddict
+        print(embsdict)
         print("#################################galleryid")
+        print(id)
         galleryid = getid(args.jsonpath, id)
         print(galleryid,id)
         stridlist = list(galleryid)
@@ -512,6 +546,9 @@ def gaitcompare(args, embsdict:dict, judge=False):
         temp = ''.join(stridlist)
         probeidnum = int(temp)
         pg_dict[probeidnum] = galleryidnum
+        matrix_dict[probeidnum] = iddict
+    print("##################matrix_dict")
+    print(matrix_dict)
     return pg_dict
 
 
@@ -616,11 +653,11 @@ def main(exp, args):
     embs_path = "{}{}.pkl".format(args.embspath, "embeddings")
     if not osp.exists(args.embspath):
         os.makedirs(args.embspath)
-    if osp.exists(embs_path):
-        print("========= Load Embs..... ==========")
-        with open(embs_path,'rb') as f:	
-            embsdic = pickle.load(f)	
-            print("========= Finish Load Embs..... ==========")
+    # if osp.exists(embs_path):
+    #     print("========= Load Embs..... ==========")
+    #     with open(embs_path,'rb') as f:	
+    #         embsdic = pickle.load(f)	
+    #         print("========= Finish Load Embs..... ==========")
 
     # gait
     gait(args, embsdic)
